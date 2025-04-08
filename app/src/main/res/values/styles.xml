@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+
+    <!-- Toolbar style -->
+    <style name="ToolbarStyle" parent="Widget.AppCompat.Toolbar">
+        <item name="android:background">#673AB7</item> <!-- Color directo -->
+        <item name="titleTextColor">@android:color/white</item>
+        <item name="android:elevation">4dp</item>
+    </style>
+</resources>
