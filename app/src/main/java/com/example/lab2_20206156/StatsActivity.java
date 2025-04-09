@@ -17,12 +17,8 @@ public class StatsActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_stats);
-
-        // Configurar Toolbar correctamente con AppCompat
         Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-
-        // Configurar botón de retroceso
+        setSupportActionBar(toolbar); // aqui encontramos la accion para el retroseso de vista
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setDisplayShowHomeEnabled(true);
@@ -32,16 +28,16 @@ public class StatsActivity extends AppCompatActivity {
         contenedorHistorial.removeAllViews();
 
         for (int i = 0; i < resultados.size(); i++) {
-            ResultActivity resultado = resultados.get(i);
-            TextView texto = new TextView(this);
+            ResultActivity resultado = resultados.get(i); // aqui obtenemos el numero de resultado y juegos
+            TextView texto = new TextView(this);  // por eso se usa un for para contabilizar las partidas
 
-            String estado = resultado.isGanado() ? "Ganó" :
-                    resultado.isCancelado() ? "Canceló" : "Perdió";
+            String estado = resultado.isGanado() ? "Ganó" : // como texto indica que ha sucedo al culminar el juego
+                    resultado.isCancelado() ? "Canceló" : "Perdió"; // si ganamos o se cancelo o perdio
 
-            String textoHistorial = "Juego " + (i + 1) + ": " + estado;
+            String textoHistorial = "Juego " + (i + 1) + ": " + estado; // de la iterativa anterior contabilizan el numero de partidas
             if (!resultado.isCancelado()) {
-                textoHistorial += " / Terminó en " + resultado.getTiempo() + "s";
-                if (resultado.isGanado()) {
+                textoHistorial += " / Terminó en " + resultado.getTiempo() + "s"; // aqui se registra el tiempo de demora
+                if (resultado.isGanado()) { // aqui se registra el numero de intentos
                     textoHistorial += " Intentos: " + resultado.getIntentos();
                 }
             }
@@ -51,10 +47,10 @@ public class StatsActivity extends AppCompatActivity {
             contenedorHistorial.addView(texto);
         }
 
-        Button botonNuevoJuego = findViewById(R.id.boton_nuevo_juego);
-        botonNuevoJuego.setOnClickListener(v -> {
-            Intent intent = new Intent(this, MainActivity.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        Button botonNuevoJuego = findViewById(R.id.boton_nuevo_juego); // tambien encontramos el nuevo juego
+        botonNuevoJuego.setOnClickListener(v -> {  // con el boton que te permite cambiar de vista al menu principal
+            Intent intent = new Intent(this, MainActivity.class); // por eso usamos intent para cambiar de vista
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP); // y regresamos para elegir otra vez la opcion de juego
             startActivity(intent);
         });
     }
@@ -66,6 +62,6 @@ public class StatsActivity extends AppCompatActivity {
     }
 
     public static void agregarResultado(ResultActivity resultado) {
-        resultados.add(resultado);
+        resultados.add(resultado); // aqui esta el resultado obtenido terminado del juego
     }
 }

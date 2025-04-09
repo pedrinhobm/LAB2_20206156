@@ -1,5 +1,6 @@
 package com.example.lab2_20206156;
-
+// nuestras variables del resultado es cubierto por si ganaste o no , o si cancelaste ,
+// el tiempo que demora , el numero de intentos por iterativa y tema elegido
 public class ResultActivity {
     private boolean ganado;
     private boolean cancelado;

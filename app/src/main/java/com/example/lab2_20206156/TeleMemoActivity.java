@@ -45,7 +45,7 @@ public class TeleMemoActivity extends AppCompatActivity {
         }
 
         // En la vista del juego usaremos el boton de acción y el botón con el ícono de estadisticas
-        // como está botonAccion y boton de estadisitcas btn
+        // como está botonAccion y boton de estadisitcas
         botonAccion = findViewById(R.id.boton_accion);
         contenedorPalabras = findViewById(R.id.contenedor_palabras);
         ImageView btnEstadisticas = findViewById(R.id.btn_estadisticas);
@@ -58,20 +58,25 @@ public class TeleMemoActivity extends AppCompatActivity {
 
         botonAccion.setOnClickListener(v -> {
             if (botonAccion.getText().toString().equals("Jugar")) {
-                comenzarJuego();
-            } else {
-                if (juegoIniciado) {
-                    // Registrar como cancelado antes de salir
+                comenzarJuego(); // al colocar la opcion de jugar, aparecen las 12 celdas
+            } else { // y de la misma manera ...
+                if (juegoIniciado) { // medimos el tiempo de la partida
+                    // aqui si va medir el tiempo que te demoras en ganar, perder o detener la partida
+                    // la funcion ha sido muy similar al de arquitectura de computadoras
+                    // cuando se queria analizar rendimiento de programas
                     long tiempoTranscurrido = (SystemClock.elapsedRealtime() - tiempoInicio) / 1000;
                     ResultActivity resultado = new ResultActivity(false, tiempoTranscurrido, intentos, temaActual);
-                    resultado.setCancelado(true);
-                    StatsActivity.agregarResultado(resultado);
+                    resultado.setCancelado(true); // es por eso que el resultado final se guarda y registra
+                    StatsActivity.agregarResultado(resultado); // a la condicion del estado de juego
                 }
-                finish();// Volver al menú principal
+                finish(); //cuando colocar "Nuevo juego", retornamos al menu principal
             }
         });
 
-        // Estado inicial
+        // Como indique anterior mente, aquí si use IA
+        // porque nos agregaron una opcion de cambiar estado de JUGAR -> NUEVO JUEGO
+        // y lo que pense es que al hcer click en ese boton y recien se habilitan las 12 celdas 3x4
+        // para elegir 1 palabra del diccionario
         contenedorPalabras.setVisibility(View.INVISIBLE);
         deshabilitarCeldas();
         temaActual = getIntent().getStringExtra("TEMA");
@@ -79,34 +84,29 @@ public class TeleMemoActivity extends AppCompatActivity {
 
     }
 
-    private void comenzarJuego() {
-        juegoIniciado = true;
-        // 1. Cambiar texto del botón
-        botonAccion.setText("Nuevo Juego");
+    // igualmente pasa para la celda
+    // habilitamos las celdas de las 12 palabras al presionar "Jugar"
+    // Obviamente en "Nuevo Juego" nos lleva ala pagina principal para escoger 3 opciones
 
-        // 2. Mostrar y habilitar el grid
+    private void comenzarJuego() {
+        juegoIniciado = true; // esa es la funcion que tambien se implemento
+        botonAccion.setText("Nuevo Juego"); // el booleano sirve para cambiar de estado del boton del Telememo
         contenedorPalabras.setVisibility(View.VISIBLE);
         habilitarCeldas();
-
-        // 3. Iniciar temporizador
-        tiempoInicio = SystemClock.elapsedRealtime();
-
-        // 4. Reiniciar variables del juego
-        palabrasSeleccionadas.clear();
-        intentos = 0;
+        tiempoInicio = SystemClock.elapsedRealtime(); // aqui iniciamos el tiempo a tardar de la partida
+        palabrasSeleccionadas.clear(); // como en arquitectura
+        intentos = 0; // para esta funcion agregamos el intento y si el flujo de buscar la siguiente palabra es correcto o no
         indiceSiguientePalabra = 0;
-
-        // 5. Configurar las palabras (si es necesario)
         configurarJuego();
     }
 
-    private void habilitarCeldas() {
+    private void habilitarCeldas() { // aqui guarda las palabras en el contenedor de las 12 celdas
         for (int i = 0; i < contenedorPalabras.getChildCount(); i++) {
             View child = contenedorPalabras.getChildAt(i);
             child.setEnabled(true);
-            if (child instanceof Button) {
-                ((Button) child).setText("?"); // Resetear texto
-            }
+            if (child instanceof Button) { // el signo de interrogación permite ocultar la palabra
+                ((Button) child).setText("?"); // de la oracion elegida aleatoriamente del diccionario
+            } // el signo ? cambia al momento que presionas la celda
         }
     }
 
@@ -117,20 +117,15 @@ public class TeleMemoActivity extends AppCompatActivity {
         }
     }
 
-
-
-
-
-    private void configurarJuego() {
-        oracionActual = obtenerOracionAleatoria(temaActual);
-        List<String> todasPalabras = new ArrayList<>(oracionActual);
+    private void configurarJuego() { // para la configuracion del juego se contará desde el inicio de la oracion
+        oracionActual = obtenerOracionAleatoria(temaActual); // eso va de acuerdo a la opcion que elejiste
+        List<String> todasPalabras = new ArrayList<>(oracionActual); // y ha se selecciona una de las 2 oraciones
 
         while(todasPalabras.size() < 12) {
             todasPalabras.add("palabra" + (todasPalabras.size() + 1));
         }
 
         Collections.shuffle(todasPalabras);
-
         GridLayout contenedor = findViewById(R.id.contenedor_palabras);
         contenedor.removeAllViews();
         botonesPalabras.clear();
@@ -158,52 +153,46 @@ public class TeleMemoActivity extends AppCompatActivity {
         }
     }
 
-
+    // para el manejo del juego si use inteligencia  dado que se veia complicado
+    // como distribuir los estados al culminar una partida
+    // de la misma manera para distribuir la cantidad de intentos restantes
+    // cuando elegia la palabra incorrecta al anterior
     private void manejarClicPalabra(View vista) {
-        Button botonClicado = (Button) vista;
-        String palabraClicada = (String) botonClicado.getTag();
-
-        // Mostrar la palabra seleccionada
+        Button botonClicado = (Button) vista; // aqui se muestra la palabra seleccionada
+        String palabraClicada = (String) botonClicado.getTag(); // de la oracion lo vamos a dividir
         botonClicado.setText(palabraClicada);
 
-        // Verificar si es la siguiente palabra correcta en la secuencia
         if (palabraClicada.equals(oracionActual.get(indiceSiguientePalabra))) {
-            // PALABRA CORRECTA
-            botonClicado.setEnabled(false);
-            palabrasSeleccionadas.add(botonClicado);
+            botonClicado.setEnabled(false); // en esta selectiva revisamos si la palabra siguiente
+            palabrasSeleccionadas.add(botonClicado); // es correcta a la secuencia
             indiceSiguientePalabra++;
 
-            // Verificar si completó toda la oración
-            if (indiceSiguientePalabra == oracionActual.size()) {
-                terminarJuego(false); // Ganó el juego
+            if (indiceSiguientePalabra == oracionActual.size()) { // verificamos si completó toda la oración
+                terminarJuego(false); // Ganó el juego con la opción falsa de cancelado
             }
-        } else {
-            // PALABRA INCORRECTA
-            intentos++;
-            TextView textoMensaje = findViewById(R.id.texto_mensaje);
-            textoMensaje.setText("Te quedan " + (3 - intentos) + " intentos");
+        } else { // aqui a selectiva indica cuando elijes una palabra incorrecta
+            intentos++; // los intentos aumentan
+            TextView textoMensaje = findViewById(R.id.texto_mensaje); // y se envia como texto la cantidad de intentos restantes
+            textoMensaje.setText("Te quedan " + (3 - intentos) + " intentos"); // al sumar esa iterativa se descuentan hasta llegar a cero para perder el juego
 
-            // Ocultar TODAS las palabras después de 500ms
-            handler.postDelayed(() -> {
-                for (Button boton : botonesPalabras) {
-                    boton.setText("?");
+            handler.postDelayed(() -> { // en esta opción ocultamos las palabras cuando te equivocas
+                for (Button boton : botonesPalabras) { // es por ello que vuelvo a colocar
+                    boton.setText("?"); // el signo de interrogacion como estaba en un principio
                     boton.setEnabled(true);
                 }
 
-                // Reiniciar el progreso
-                palabrasSeleccionadas.clear();
+                palabrasSeleccionadas.clear(); // la opcion de clear indica que para reiniciar el sistema del juego
                 indiceSiguientePalabra = 0;
 
-                // Verificar si perdió
-                if (intentos >= 3) {
-                    terminarJuego(false); // Perdió el juego
+                if (intentos >= 3) { // como indique anteriormente, los intentos se incrementan
+                    terminarJuego(false); // y si llegas a 3 equivocaciones, perdiste el juego
                 }
             }, 500);
         }
     }
 
     private List<String> obtenerOracionAleatoria(String tema) {
-        String[] oraciones;
+        String[] oraciones; // es es el diccionario de las oraciones por tema
 
         switch (tema) {
             case "Software":
@@ -227,29 +216,29 @@ public class TeleMemoActivity extends AppCompatActivity {
             default:
                 oraciones = new String[]{""};
         }
-
+        // agregamos la variable seleccionada para que el juego elija la oracion aleatoria
         String seleccionada = oraciones[new Random().nextInt(oraciones.length)];
         return new ArrayList<>(List.of(seleccionada.split(" ")));
     }
 
-    private void terminarJuego(boolean cancelado) {
-        long tiempoTranscurrido = (SystemClock.elapsedRealtime() - tiempoInicio) / 1000;
-        TextView textoMensaje = findViewById(R.id.texto_mensaje);
+    private void terminarJuego(boolean cancelado) { // este es la funcion de acabar el juego , asi ganes , canceles o pierdes
+        long tiempoTranscurrido = (SystemClock.elapsedRealtime() - tiempoInicio) / 1000; // esta funcion parte desde el tiempo inicial hasta finalizar
+        TextView textoMensaje = findViewById(R.id.texto_mensaje); // para medir el tiempo, use systemclock.elapsed time
 
-        if (cancelado) {
+        if (cancelado) { // para la opcin de cancelado , usamos el booleano de cancelado para que lo registre en las estadisticas
             ResultActivity resultado = new ResultActivity(false, tiempoTranscurrido, intentos, temaActual);
-            resultado.setCancelado(true);
+            resultado.setCancelado(true); // aqui se dirije a la funcion que agrega el resultado de cancelado
             StatsActivity.agregarResultado(resultado);
-            finish();
-        } else if (indiceSiguientePalabra == oracionActual.size()) {
-            textoMensaje.setText("Ganó / Terminó en " + tiempoTranscurrido + "s Intentos: " + (intentos + 1));
+            finish(); // la siguiente seelctiva es cuando la ultima palabra llega a su instancia final
+        } else if (indiceSiguientePalabra == oracionActual.size()) { // es por eso que sacan el tamaño de la orgacion actial que es 12
+            textoMensaje.setText("Ganó / Terminó en " + tiempoTranscurrido + "s Intentos: " + (intentos + 1)); // y asi indica que ganamos
             ResultActivity resultado = new ResultActivity(true, tiempoTranscurrido, intentos + 1, temaActual);
             StatsActivity.agregarResultado(resultado);
-        } else {
+        } else { // y si no sucede de los anteriore casos , perdimos de frente con los intentos
             textoMensaje.setText("Perdió / Terminó en " + tiempoTranscurrido + "s");
             ResultActivity resultado = new ResultActivity(false, tiempoTranscurrido, intentos + 1, temaActual);
-            StatsActivity.agregarResultado(resultado);
-        }
+            StatsActivity.agregarResultado(resultado); // en todos los casos vemos que el resultado final se guarda en la vista de estadistica
+        } // por eso usamos StatsActivity java
 
         for (Button boton : botonesPalabras) {
             boton.setEnabled(false);
